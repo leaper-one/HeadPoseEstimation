@@ -10,6 +10,7 @@ import numpy as np
 from drawFace import draw
 import reference_world as world
 
+# 获取预测模型
 PREDICTOR_PATH = os.path.join("models", "shape_predictor_68_face_landmarks.dat")
 
 if not os.path.isfile(PREDICTOR_PATH):
@@ -22,6 +23,7 @@ parser.add_argument("-i", "--image",
                     type=str,
                     help="image location for pose estimation")
 
+# TODO: 如何校准相机？
 parser.add_argument("-f", "--focal",
                     type=float,
                     help="Callibrated Focal Length of the camera")
@@ -34,6 +36,9 @@ def main(image):
     predictor = dlib.shape_predictor(PREDICTOR_PATH)
 
     while True:
+        '''
+        寻常的 cv2 初始化
+        '''
         im = cv2.imread(image)
 
         faces = detector(cv2.cvtColor(im, cv2.COLOR_BGR2RGB), 0)
@@ -48,12 +53,13 @@ def main(image):
             refImgPts = world.ref2dImagePoints(shape)
 
             height, width, channel = im.shape
-            focalLength = args.focal * width
-            cameraMatrix = world.cameraMatrix(focalLength, (height / 2, width / 2))
+            focalLength = args.focal * width # TODO: 焦距乘宽度是什么意思？
+            cameraMatrix = world.cameraMatrix(focalLength, (height / 2, width / 2)) # 相机矩阵
 
             mdists = np.zeros((4, 1), dtype=np.float64)
 
             # calculate rotation and translation vector using solvePnP
+            # PnP方法计算 rotation and translation 向量
             success, rotationVector, translationVector = cv2.solvePnP(
                 face3Dmodel, refImgPts, cameraMatrix, mdists)
 
@@ -61,12 +67,18 @@ def main(image):
             noseEndPoint2D, jacobian = cv2.projectPoints(
                 noseEndPoints3D, rotationVector, translationVector, cameraMatrix, mdists)
 
+            '''
+            画图相关
+            '''
             # draw nose line 
             p1 = (int(refImgPts[0, 0]), int(refImgPts[0, 1]))
             p2 = (int(noseEndPoint2D[0, 0, 0]), int(noseEndPoint2D[0, 0, 1]))
             cv2.line(im, p1, p2, (110, 220, 0),
                      thickness=2, lineType=cv2.LINE_AA)
 
+            '''
+            计算角度 x, y, z
+            '''
             # calculating angle
             rmat, jac = cv2.Rodrigues(rotationVector)
             angles, mtxR, mtxQ, Qx, Qy, Qz = cv2.RQDecomp3x3(rmat)
