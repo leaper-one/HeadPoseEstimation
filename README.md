@@ -4,7 +4,7 @@ In computer vision pose estimation specifically refers to the relative orientati
 ![](sample.gif)<br>
 sample video [credits](https://www.pexels.com/video/close-up-of-a-woman-showing-different-facial-expressions-3063839/)
 
-
+# 2022.3.4: [head_pose_from_image.py](https://github.com/leaper-one/HeadPoseEstimation/blob/master/head_pose_from_image.py) 已经添加了一些注释
 # 需要知道的一些事情
 - 原理介绍：[Head Pose Estimation using OpenCV and Dlib](https://learnopencv.com/head-pose-estimation-using-opencv-and-dlib/)  
 - [设置焦距](https://docs.opencv.org/3.4/d4/d94/tutorial_camera_calibration.html)  
